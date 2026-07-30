@@ -60,12 +60,47 @@ function validarFecha(string $valor, string $nombre): array {
     return $errores;
 }
 
+// 🇪🇨 VALIDACIÓN OFICIAL DE CÉDULA ECUATORIANA (MÓDULO 10)
 function validarCedula(string $valor): array {
-    $texto = trim($valor);
-    if ($texto === '') {
+    $cedula = trim($valor);
+    
+    if ($cedula === '') {
         return ['La cédula es obligatoria.'];
     }
-    return preg_match('/^\d{1,10}$/', $texto) ? [] : ['La cédula debe contener solo números.'];
+
+    if (!preg_match('/^\d{10}$/', $cedula)) {
+        return ['La cédula debe contener exactamente 10 dígitos numéricos.'];
+    }
+
+    $provincia = (int)substr($cedula, 0, 2);
+    if (($provincia < 1 || $provincia > 24) && $provincia !== 30) {
+        return ['La cédula no pertenece a ninguna provincia válida de Ecuador.'];
+    }
+
+    $tercerDigito = (int)$cedula[2];
+    if ($tercerDigito >= 6) {
+        return ['El número de cédula no corresponde a una persona natural.'];
+    }
+
+    $coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
+    $suma = 0;
+    
+    for ($i = 0; $i < 9; $i++) {
+        $valorPosicion = (int)$cedula[$i] * $coeficientes[$i];
+        if ($valorPosicion >= 10) {
+            $valorPosicion -= 9;
+        }
+        $suma += $valorPosicion;
+    }
+
+    $digitoVerificadorCalculado = (10 - ($suma % 10)) % 10;
+    $digitoVerificadorReal = (int)$cedula[9];
+
+    if ($digitoVerificadorCalculado !== $digitoVerificadorReal) {
+        return ['La cédula ingresada es inválida (falló la verificación de Ecuador).'];
+    }
+
+    return [];
 }
 
 function validarTelefono(string $valor): array {
@@ -73,7 +108,7 @@ function validarTelefono(string $valor): array {
     if ($texto === '') {
         return [];
     }
-    return preg_match('/^\d{7,15}$/', $texto) ? [] : ['El teléfono debe contener solo números.'];
+    return preg_match('/^\d{7,15}$/', $texto) ? [] : ['El teléfono debe contener entre 7 y 15 dígitos numéricos.'];
 }
 
 function validarEmail(string $valor): array {
