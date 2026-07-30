@@ -1,0 +1,46 @@
+:root {
+    --verde-oscuro: #1b4332;
+    --verde-medio: #2d6a4f;
+    --verde-claro: #40916c;
+    --fondo-gris: #f8f9fa;
+}
+
+body {
+    background-color: var(--fondo-gris);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#sidebar {
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+    background-color: var(--verde-oscuro);
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+#sidebar .nav-link {
+    color: #fff;
+    border-radius: 8px;
+}
+
+#sidebar .nav-link:hover,
+#sidebar .active-menu {
+    background: var(--verde-medio);
+}
+
+.card {
+    border: 0;
+    border-radius: 12px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.form-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
