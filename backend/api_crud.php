@@ -18,6 +18,22 @@ function sendJson($data, int $status = 200): void {
     exit;
 }
 
+// 🔤 VALIDACIÓN DE SOLO LETRAS (Para Nombre y Apellido)
+function validarNombreApellido(string $valor, string $nombreCampo, int $max = 80): array {
+    $texto = trim($valor);
+    if ($texto === '') {
+        return ['El campo ' . $nombreCampo . ' es obligatorio.'];
+    }
+    if (mb_strlen($texto) > $max) {
+        return ['El campo ' . $nombreCampo . ' no debe superar ' . $max . ' caracteres.'];
+    }
+    // Solo permite letras en español, espacios y tildes
+    if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u', $texto)) {
+        return ['El campo ' . $nombreCampo . ' solo debe contener letras, sin números ni símbolos.'];
+    }
+    return [];
+}
+
 function validarTexto(string $valor, string $nombre, bool $requerido = true, int $max = 255): array {
     $errores = [];
     $texto = trim($valor);
@@ -103,12 +119,16 @@ function validarCedula(string $valor): array {
     return [];
 }
 
+// 📱 VALIDACIÓN DE TELÉFONO ECUATORIANO (9 a 10 DÍGITOS)
 function validarTelefono(string $valor): array {
     $texto = trim($valor);
     if ($texto === '') {
         return [];
     }
-    return preg_match('/^\d{7,15}$/', $texto) ? [] : ['El teléfono debe contener entre 7 y 15 dígitos numéricos.'];
+    if (!preg_match('/^\d{9,10}$/', $texto)) {
+        return ['El teléfono debe contener exactamente 9 o 10 dígitos numéricos (ej. 0987654321 o 022345678).'];
+    }
+    return [];
 }
 
 function validarEmail(string $valor): array {
@@ -222,8 +242,8 @@ try {
             }
             if ($method === 'POST') {
                 $errores = array_merge(
-                    validarTexto((string)($input['nombre'] ?? ''), 'nombre', true, 80),
-                    validarTexto((string)($input['apellido'] ?? ''), 'apellido', true, 80),
+                    validarNombreApellido((string)($input['nombre'] ?? ''), 'nombre', 80),
+                    validarNombreApellido((string)($input['apellido'] ?? ''), 'apellido', 80),
                     validarCedula((string)($input['cedula'] ?? '')),
                     validarTelefono((string)($input['telefono'] ?? '')),
                     validarEmail((string)($input['email'] ?? '')),
@@ -242,8 +262,8 @@ try {
                     sendJson(['estado' => 'error', 'errores' => ['El id es obligatorio.']], 422);
                 }
                 $errores = array_merge(
-                    validarTexto((string)($input['nombre'] ?? ''), 'nombre', true, 80),
-                    validarTexto((string)($input['apellido'] ?? ''), 'apellido', true, 80),
+                    validarNombreApellido((string)($input['nombre'] ?? ''), 'nombre', 80),
+                    validarNombreApellido((string)($input['apellido'] ?? ''), 'apellido', 80),
                     validarCedula((string)($input['cedula'] ?? '')),
                     validarTelefono((string)($input['telefono'] ?? '')),
                     validarEmail((string)($input['email'] ?? '')),
