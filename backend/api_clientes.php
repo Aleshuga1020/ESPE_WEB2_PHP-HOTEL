@@ -28,8 +28,31 @@ function validarCliente(array $data): array {
 
     if ($nombre === '') $errores[] = 'El nombre es obligatorio.';
     if ($apellido === '') $errores[] = 'El apellido es obligatorio.';
-    if ($cedula === '' || !preg_match('/^\d{1,10}$/', $cedula)) $errores[] = 'La cédula debe contener solo números.';
-    if ($telefono !== '' && !preg_match('/^\d{7,15}$/', $telefono)) $errores[] = 'El teléfono debe contener solo números.';
+    
+    // Validación Módulo 10 Cédula
+    if ($cedula === '' || !preg_match('/^\d{10}$/', $cedula)) {
+        $errores[] = 'La cédula debe contener exactamente 10 dígitos numéricos.';
+    } else {
+        $provincia = (int)substr($cedula, 0, 2);
+        if (($provincia < 1 || $provincia > 24) && $provincia !== 30) {
+            $errores[] = 'La cédula no pertenece a ninguna provincia válida de Ecuador.';
+        } elseif ((int)$cedula[2] >= 6) {
+            $errores[] = 'El número de cédula no corresponde a una persona natural.';
+        } else {
+            $coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
+            $suma = 0;
+            for ($i = 0; $i < 9; $i++) {
+                $v = (int)$cedula[$i] * $coeficientes[$i];
+                $suma += ($v >= 10) ? ($v - 9) : $v;
+            }
+            $digitoVerificador = (10 - ($suma % 10)) % 10;
+            if ($digitoVerificador !== (int)$cedula[9]) {
+                $errores[] = 'La cédula ingresada es inválida (falló la verificación de Ecuador).';
+            }
+        }
+    }
+
+    if ($telefono !== '' && !preg_match('/^\d{7,15}$/', $telefono)) $errores[] = 'El teléfono debe contener entre 7 y 15 números.';
     if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errores[] = 'El email no tiene un formato válido.';
     if ($direccion === '') $errores[] = 'La dirección es obligatoria.';
 
