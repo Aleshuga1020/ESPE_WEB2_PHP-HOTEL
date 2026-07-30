@@ -1,19 +1,21 @@
 <?php
 declare(strict_types=1);
 
-$host = '127.0.0.1';
-$user = 'root';
-$password = '';
-$database = 'FINAL';
-$charset = 'utf8mb4';
-$unixSocket = '/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock';
+// Leemos las variables de entorno configuradas en Render (con fallback por si acaso)
+$host     = getenv('DB_HOST')     ?: '127.0.0.1';
+$user     = getenv('DB_USER')     ?: 'root';
+$password = getenv('DB_PASSWORD') ?: '';
+$database = getenv('DB_NAME')     ?: 'test';
+$port     = getenv('DB_PORT')     ?: '4000';
+$charset  = 'utf8mb4';
 
-$dns = "mysql:host=$host;dbname=$database;charset=$charset;unix_socket=$unixSocket";
+// En la nube (Render) no usamos socket local, sino host y puerto TCP
+$dns = "mysql:host=$host;port=$port;dbname=$database;charset=$charset";
 
 $opciones = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
+    PDO::ATTR_EMULATE_PREPARES   => false,
 ];
 
 try {
@@ -22,8 +24,8 @@ try {
     http_response_code(500);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
-        'estado' => 'error',
-        'mensaje' => 'Error de conexión a la base de datos.'
+        'estado'  => 'error',
+        'mensaje' => 'Error de conexión a la base de datos: ' . $e->getMessage()
     ]);
     exit;
 }
